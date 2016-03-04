@@ -233,8 +233,7 @@ Note: We don't recommend using `throw error` as your error handling strategy (as
 
 1. [fs.readFile Official Documentation](https://nodejs.org/api/fs.html#fs_fs_readfile_file_options_callback)
 1. [fs.writeFile Official Documentation](https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback)
-2. [Thinking Asynchronously video](http://nodecasts.net/episodes/5-thinking-asynchronously)
-
+1. [Thinking Asynchronously video](http://nodecasts.net/episodes/5-thinking-asynchronously)
 
 
 ---
