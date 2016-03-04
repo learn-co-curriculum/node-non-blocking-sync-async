@@ -52,9 +52,9 @@ Typically, core Node modules will provide both synchronous and asynchronous meth
 
 ## `fs.readFileSync()`
 
-Imagine you are writing a script to extract, transform, and save information from/to a file. The order of the statements matter because you need to extract information first before you can manipulate the data, which needs to happen before you can write to another file. You don't really care about making this script non-blocking because there would be no other requests. It's not a server. Just a script which has one user (you) and you will launch a maximum of one instances at the same time (concurrently).
+Imagine you are writing a script to extract, transform, and save information from/to a file. The order of the statements matter because you need to extract information first before you can manipulate the data, which needs to happen before you can write to another file. You don't really care about making this script non-blocking because there would be no other requests. It's not a server, it's just a script which has one user (you) and you will launch a maximum of one instances at the same time (concurrently).
 
-To extract the information, we need to read the file `fs.readFileSync`. The method for reading file content has this usage:
+To extract the information, we need to read the file `fs.readFileSync`:
 
 ```js
 var filename = './fake-path/input.txt'
@@ -70,29 +70,31 @@ console.log('Finish reading file')
 console.log(content)
 ```
 
-The output will have "Start reading file" and "Finish reading file" in that order. The `content` variable will be defined for the `console.log(content)`. This is very promising because the execution order is the same as the order in which we wrote the statements. We can rest assured that we can write the file after reading and transforming it.
+The output will have "Start reading file" and "Finish reading file" in that order. The `content` variable will be defined for the `console.log(content)`. This is very straightforward because the execution order is the same as the order in which we wrote the statements. We can rest assured that we can get the data to transform it before we start the manipulations.
 
 
 ## fs.writeFileSync()
 
-The `writeFileSync` has the same use cases as the other synchronous methods with the main being easier to read and understand (by developers). The synchronous method for writing to a file has this usage:
+The `writeFileSync` is the synchronous method for writing to a file:
 
 ```js
 fs.writeFileSync(filename, content, options)
 ```
 
-If we add console logs, the output will also has "Start reading file" and " Finish reading file"
+If we add console logs, the output will also has "Start writing file" and " Finish writing file"
 
 ```js
-console.log('Start reading file')
-fs.writeFileSync(filename, content, options)
-console.log('Finish reading file')
+var filename = './fake-path/input.txt'
+var content = fs.readFileSync(filename, options)
+var fileToWriteTo = './fake-path/output.txt'
+console.log('Start writing file') 
+fs.writeFileSync(filToWriteTo, content, options)
+console.log('Finish writing file')
 ```
 
 `fs` has other synchronous methods but the idea is usually the same—you get the data as the result of the expression and the next line is executed **after** the synchronous method is done.
 
 In most cases, we are dealing with concurrency and so we must use asynchronous code to make our apps performant. Nevertheless, you should know that it's possible so write synchronous code and when it's appropriate.
-
 
 
 ## Async Way of Thinking
@@ -117,27 +119,21 @@ While the value of a is 2
 Now the value of a is 2
 ```
 
-Because in most languages the execution goes in the order of the statements, a person might think that because `a =2` precedes `Now the value...`, the second and third output will have the values of 2. This is incorrect, because `setTimeout()` is scheduled asynchronously in the future. The right output will be:
+Because in most languages the execution goes in the order of the statements, a person might think that because `a =2` precedes `Now the value...`, the second and third output will have the values of 2. This is incorrect, because `setTimeout()` is scheduled asynchronously. The right output will be:
 
 ```js
 The value of a is  1
 Now the value of a is 1
-// delay of roughly 500 miliseconds
+// delay of roughly 500 milliseconds
 While the value of a is 2
 ```
 
-This misunderstanding of async code leads to many bugs especially for developers new to JavaScript and Node. That's why it's important to start thinking async way.
+This misunderstanding of async code can lead to many bugs. It's important to pay attention to how async works to avoid creating issues for yourself down the line.
 
 
 ## fs.readFile
 
-So to read a file in the synchronous mode, we would use this method:
-
-```js
-var content = fs.readFileSync(filename, options)
-```
-
-The above code will block the execution of everything until the file is read. So if we add output:
+Let's take our synchronous code to read a file, and translate it to asynchronous:
 
 ```js
 var fs = require('fs')
@@ -152,8 +148,8 @@ The code will produce "Start reading file", then wait until the file reading is 
 The async method `fs.readFile` is a better because our program can do something else while it waits for the content of the file. There are a few things which are different in `fs.readFile` comparing to `fs.readFileSync`:
 
 1. We need to use callback
-2. The callback has an error object
-3. The callback has the content object (the data from the file)
+2. The callback accepts an error object as a parameter
+3. The callback accepts the content object (the data from the file) as a parameter
 4. We don't get the content right away because `readFile` is **not an expression** like `fs.readFileSync`. (Expressions are functions which return something.) In other words, we cannot write `var content = fs.readFile(...)`.
 
 ```js
@@ -166,7 +162,7 @@ fs.readFile('README.md', 'utf-8', function(error, content) {
 console.log('I CAN DO SOMETHING ELSE WHILE WAITING!')
 ```
 
-You might wonder what would be the output of our async code? It's shown below. You can observe that while the app was waiting on the file system task (reading), it processed the "I CAN DO SOMETHING ELSE WHILE WAITING!" console log. Typically a Node.js web server will be processing and handling multiple requests from clients at the same time while waiting for some input/output operation to finish.
+You might wonder what would be the output of our async code? 
 
 ```
 Start reading file
@@ -174,6 +170,8 @@ I CAN DO SOMETHING ELSE WHILE WAITING!
 Finish reading file
 ... // Content of the file
 ```
+
+You can observe that while the app was waiting on the file system task (reading), it processed the "I CAN DO SOMETHING ELSE WHILE WAITING!" console log. Typically a Node.js web server will be processing and handling multiple requests from clients at the same time while waiting for an input/output operation to finish.
 
 In the synchronous world, we would handle errors with `try/catch` so that `readFileSync` is wrapped in it:
 
@@ -189,7 +187,7 @@ console.log('Finish reading file')
 console.log(content)
 ```
 
-If we do not do that, the entire app will crash if there's an error with reading a file (like the wrong file name). On the other hand, in async coding `try/catch` is useless because the events scheduled by the event loop will happen in the future and we lose the context of `try/catch` (if you don't understand what it says—don't worry, just know that with async we don't use `try/catch`).
+If we do not do that, the entire app will crash if there's an error with reading a file (like the wrong file name). On the other hand, in async coding `try/catch` is useless because the events scheduled by the event loop will happen in the future and we lose the context of `try/catch`.
 
 The way to handle async errors is by receiving them in callbacks and checking for them. If we got an error, we bubble it up or handle it right there:
 
@@ -206,7 +204,7 @@ By using the `return` statement, we guarantee that the execution flow will stop 
 
 ## fs.writeFile
 
-The `fs.writeFile` work similarly to `fs.readFile` in a way that it requires a callback. The callback has one argument `error`:
+`fs.writeFile` works similarly to `fs.readFile` in that it requires a callback. The callback has one argument `error`:
 
 ```
 var fs = require('fs')
