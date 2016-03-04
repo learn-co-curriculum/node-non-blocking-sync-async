@@ -6,13 +6,11 @@ We've spent a lot of time in the beginning of Unit 1 talking about non-blocking 
 
 Yes, synchronous code might be useful. Imagine a situation where you read configurations from a file to boot up your system. Without the configurations, the system won't work. In this case, you don't want the asynchronous method. The synchronous method would be a better idea, because the system won't start without the configurations.
 
-So although this unit is called non-blocking (and we'll cover asynchronous non-blocking code later), this this lesson will cover the synchronous code on the example of the `fs` module.
-
-One of the major challenges in learning Node.js is its asynchronous code patterns. Human brain just didn't evolve to think in parallel processes. This hurdle is exacerbated when people learning Node are experienced developers in other more traditional and synchronous languages (PHP, Java, Ruby, Python, C).
+On the other hand, one of the major challenges in learning Node.js is its asynchronous code patterns. Human brain just didn't evolve to think in parallel processes. This hurdle is exacerbated when people learning Node are experienced developers in other more traditional and synchronous languages (PHP, Java, Ruby, Python, C).
 
 Understanding asynchronous code and its patterns is the key to mastering Node.js. Besides the async code, and a few differences like module system, globals and data types, Node is almost the same as browser JavaScript. For this reason, let's dig deeper into the async code and how we can implement it.
 
-This lesson will cover the async code on the example of `fs`.
+This lesson will cover the sync and async code on the example of `fs`.
 
 ## Objectives
 
